@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Node / build tooling (in case a build step is introduced later)
+node_modules/
+dist/
+.cache/
+npm-debug.log*
+
+# Local env files (should never contain secrets for this project, but ignore by default)
+.env
+.env.local
+
+# Personal data backups exported from the app (JSON exports contain your character prompts/images)
+character-library-backup-*.json

@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>キャラクター図鑑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f4fb; --surface:#ffffff; --surface-alt:#f0ecf8; --border:#e1d9ee;
+    --text:#221f2e; --text-muted:#6f6884;
+    --accent:#b8305f; --accent-strong:#96234c; --accent-soft:#f6dbe4;
+    --shadow: 0 1px 2px rgba(40,20,50,.06), 0 6px 20px rgba(40,20,50,.06);
+    --danger:#c23b3b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15121f; --surface:#1e1a2c; --surface-alt:#262038; --border:#372f4a;
+      --text:#eee9f8; --text-muted:#9a91b3;
+      --accent:#e8608e; --accent-strong:#f183a6; --accent-soft:#3a2333;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+      --danger:#e06767;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15121f; --surface:#1e1a2c; --surface-alt:#262038; --border:#372f4a;
+    --text:#eee9f8; --text-muted:#9a91b3;
+    --accent:#e8608e; --accent-strong:#f183a6; --accent-soft:#3a2333;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    --danger:#e06767;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .brand, h2, h3, h4{ font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif; }
+  ::selection{ background:var(--accent-soft); }
+
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 20px 80px; }
+
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .top-inner{ max-width:1080px; margin:0 auto; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .brand{ font-size:22px; font-weight:900; letter-spacing:.02em; display:flex; align-items:center; gap:10px; }
+  .brand-mark{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(155deg, var(--accent), var(--accent-strong)); font-size:17px; }
+  .count-pill{ font-size:12.5px; color:var(--text-muted); font-weight:500; background:var(--surface-alt); border:1px solid var(--border); padding:4px 10px; border-radius:999px; }
+  button{ font-family:inherit; }
+  .btn{ border:1px solid var(--border); background:var(--surface); color:var(--text); padding:9px 16px; border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; transition:transform .12s ease, border-color .12s ease, background .12s ease; }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:linear-gradient(155deg, var(--accent), var(--accent-strong)); border:none; color:#fff; font-weight:700; box-shadow:0 4px 14px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .btn-primary:hover{ filter:brightness(1.05); }
+  .btn-danger{ border-color:color-mix(in srgb, var(--danger) 55%, var(--border)); color:var(--danger); background:transparent; }
+  .btn-danger:hover{ border-color:var(--danger); background:color-mix(in srgb, var(--danger) 8%, transparent); }
+  .btn-ghost{ background:transparent; border-color:transparent; color:var(--text-muted); }
+  .btn-ghost:hover{ color:var(--text); background:var(--surface-alt); border-color:var(--border); }
+  .btn-sm{ padding:6px 12px; font-size:13px; border-radius:8px; }
+
+  .toolbar{ margin-top:22px; display:flex; flex-direction:column; gap:12px; }
+  .search-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .search-box{ position:relative; flex:1 1 240px; min-width:200px; }
+  .search-box input{ width:100%; padding:11px 14px 11px 38px; border-radius:11px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:14.5px; outline:none; }
+  .search-box input:focus{ border-color:var(--accent); }
+  .search-box svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.5; }
+  select{ font-family:inherit; }
+  select.sort-select{ padding:11px 14px; border-radius:11px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:14px; outline:none; cursor:pointer; }
+  .tag-filter-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .tag-chip{ padding:6px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-size:13px; cursor:pointer; user-select:none; transition:all .12s ease; }
+  .tag-chip:hover{ border-color:var(--accent); color:var(--text); }
+  .tag-chip.active{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-strong); font-weight:700; }
+  .clear-filters{ font-size:12.5px; color:var(--text-muted); text-decoration:underline; cursor:pointer; background:none; border:none; padding:6px 4px;}
+  .clear-filters:hover{ color:var(--accent); }
+
+  .grid{ margin-top:22px; display:grid; grid-template-columns:repeat(auto-fill, minmax(168px,1fr)); gap:16px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; text-align:left; padding:0; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; display:flex; flex-direction:column; }
+  .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--accent); }
+  .thumb{ width:100%; aspect-ratio:3/4; background:var(--surface-alt); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .thumb .placeholder{ font-size:34px; opacity:.35; }
+  .card-body{ padding:10px 12px 13px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .card-name{ font-weight:700; font-size:14.5px; line-height:1.3; word-break:break-word; }
+  .card-model{ font-size:11px; color:var(--text-muted); }
+  .card-tags{ display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; }
+  .mini-tag{ font-size:11px; padding:2px 8px; border-radius:999px; background:var(--surface-alt); color:var(--text-muted); border:1px solid var(--border); }
+
+  .empty{ margin-top:60px; text-align:center; color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .empty .icon{ font-size:44px; opacity:.5; }
+  .empty p{ margin:0; font-size:14.5px; line-height:1.7; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(10,8,16,.55); display:flex; align-items:flex-start; justify-content:center; padding:min(6vh,48px) 16px; z-index:100; overflow-y:auto; opacity:0; pointer-events:none; transition:opacity .18s ease; }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  .modal{ background:var(--surface); border-radius:18px; width:100%; max-width:680px; border:1px solid var(--border); box-shadow:var(--shadow); transform:translateY(8px); transition:transform .18s ease; max-height:90vh; display:flex; flex-direction:column; }
+  .overlay.open .modal{ transform:translateY(0); }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .modal-head h2{ margin:0; font-size:18px; font-weight:700; }
+  .modal-body{ padding:20px; overflow-y:auto; }
+  .modal-foot{ padding:14px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; flex-shrink:0; }
+  .icon-btn{ background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:20px; line-height:1; padding:4px; border-radius:8px; }
+  .icon-btn:hover{ color:var(--text); background:var(--surface-alt); }
+
+  .form-section{ margin-bottom:26px; padding-bottom:22px; border-bottom:1px solid var(--border); }
+  .form-section:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .form-section h3{ margin:0 0 14px; font-size:14px; font-weight:700; color:var(--accent-strong); display:flex; align-items:center; gap:7px; }
+
+  .field{ margin-bottom:16px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:block; font-size:13px; font-weight:700; margin-bottom:6px; color:var(--text-muted); }
+  .field input[type=text], .field input[type=number], .field textarea, .field select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface-alt); color:var(--text); font-size:14px; outline:none;
+    font-family:inherit; resize:vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{ border-color:var(--accent); }
+  .field textarea{ min-height:70px; line-height:1.6; }
+  .field-hint{ font-size:12px; color:var(--text-muted); margin-top:6px; line-height:1.5; }
+
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  @media (max-width:520px){ .row3{ grid-template-columns:1fr 1fr; } }
+
+  .thumb-picker{ display:flex; gap:14px; align-items:center; }
+  .thumb-preview{ width:96px; height:128px; border-radius:10px; overflow:hidden; flex-shrink:0; background:var(--surface-alt); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; position:relative; }
+  .thumb-preview img{ width:100%; height:100%; object-fit:cover; }
+  .thumb-preview .placeholder{ font-size:26px; opacity:.35; }
+  .thumb-picker-actions{ display:flex; flex-direction:column; gap:8px; }
+  input[type=file]{ display:none; }
+
+  .chip-editor{ display:flex; flex-wrap:wrap; gap:6px; padding:8px; border-radius:10px; border:1px solid var(--border); background:var(--surface-alt); }
+  .chip-editor-chip{ display:flex; align-items:center; gap:5px; background:var(--accent-soft); color:var(--accent-strong); border-radius:999px; padding:4px 6px 4px 11px; font-size:13px; font-weight:600; }
+  .chip-editor-chip button{ background:none; border:none; color:var(--accent-strong); cursor:pointer; font-size:14px; line-height:1; padding:2px 4px; opacity:.7; }
+  .chip-editor-chip button:hover{ opacity:1; }
+  .chip-editor input{ flex:1 1 100px; min-width:100px; border:none; background:none; outline:none; color:var(--text); font-size:14px; padding:6px 4px; font-family:inherit; }
+
+  /* LoRA rows */
+  .lora-list{ display:flex; flex-direction:column; gap:8px; }
+  .lora-row{ display:flex; gap:8px; align-items:center; }
+  .lora-row input[type=text]{ flex:1; }
+  .lora-row input.strength{ width:76px; flex:none; }
+  .lora-row .remove-row{ flex:none; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:6px; border-radius:8px; }
+  .lora-row .remove-row:hover{ color:var(--danger); background:var(--surface-alt); }
+  .add-row-btn{ align-self:flex-start; font-size:12.5px; color:var(--accent); background:none; border:none; cursor:pointer; font-weight:700; padding:4px 2px; }
+  .add-row-btn:hover{ text-decoration:underline; }
+
+  /* Prompt categorizer */
+  .category-manager{ margin-bottom:12px; }
+  .category-manager label{ display:block; font-size:12.5px; font-weight:700; margin-bottom:6px; color:var(--text-muted); }
+  .auto-classify-row{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .auto-classify-check{ display:flex !important; align-items:center; gap:7px; font-size:13px; font-weight:500 !important; color:var(--text) !important; margin-bottom:0 !important; cursor:pointer; }
+  .auto-classify-check input{ width:auto; accent-color:var(--accent); }
+  .paste-row{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .paste-row textarea{ min-height:64px; }
+  .prompt-tag-list{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+  .prompt-tag-row{ display:flex; align-items:center; gap:8px; background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:6px 8px; }
+  .prompt-tag-text{ flex:1; font-size:13.5px; word-break:break-word; }
+  .prompt-tag-row select{ padding:6px 8px; font-size:12.5px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); width:auto; max-width:130px; }
+  .prompt-tag-row .remove-row{ background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:15px; padding:4px; border-radius:6px; flex:none; }
+  .prompt-tag-row .remove-row:hover{ color:var(--danger); }
+  .manual-tag-add{ display:flex; gap:8px; margin-top:10px; }
+  .manual-tag-add input[type=text]{ flex:1; }
+  .manual-tag-add select{ width:auto; max-width:130px; }
+  .prompt-empty-hint{ font-size:12.5px; color:var(--text-muted); padding:10px 4px; }
+  .prompt-preview{ margin-top:12px; }
+  .prompt-preview-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .prompt-preview-head span{ font-size:12px; font-weight:700; color:var(--text-muted); }
+  .prompt-preview-box{ background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.6; color:var(--text-muted); max-height:90px; overflow-y:auto; word-break:break-word; }
+  .copy-btn{ font-size:11.5px; color:var(--accent); background:none; border:none; cursor:pointer; font-weight:700; padding:2px 4px; }
+  .copy-btn:hover{ text-decoration:underline; }
+
+  /* detail view */
+  .detail-top{ display:flex; gap:18px; }
+  .detail-thumb{ width:150px; height:200px; border-radius:12px; overflow:hidden; flex-shrink:0; background:var(--surface-alt); border:1px solid var(--border); }
+  .detail-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .detail-meta{ flex:1; min-width:0; }
+  .detail-meta h3{ margin:0 0 8px; font-size:19px; }
+  .detail-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .detail-date{ font-size:12.5px; color:var(--text-muted); }
+  .detail-section{ margin-top:20px; }
+  .detail-section h4{ margin:0 0 8px; font-size:12.5px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; justify-content:space-between; }
+  .detail-pre{ background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word; color:var(--text); max-height:160px; overflow-y:auto; }
+  .detail-pre.empty-note{ color:var(--text-muted); font-style:italic; }
+  .prompt-groups{ display:flex; flex-direction:column; gap:10px; }
+  .prompt-group{ background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+  .prompt-group-title{ font-size:11.5px; font-weight:700; color:var(--accent-strong); margin-bottom:6px; }
+  .prompt-group-tags{ display:flex; flex-wrap:wrap; gap:5px; }
+  .prompt-group-tags .mini-tag{ background:var(--surface); }
+
+  .settings-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; }
+  .settings-grid .item{ font-size:13px; }
+  .settings-grid .item .k{ color:var(--text-muted); font-size:11.5px; margin-bottom:2px; }
+  .settings-grid .item .v{ font-weight:600; word-break:break-word; }
+  .lora-chip-list{ display:flex; flex-wrap:wrap; gap:6px; }
+  .lora-chip{ font-size:12px; padding:3px 10px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text); }
+
+  .confirm-overlay{ position:fixed; inset:0; background:rgba(10,8,16,.55); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+  .confirm-overlay.open{ opacity:1; pointer-events:auto; }
+  .confirm-box{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; max-width:340px; width:100%; box-shadow:var(--shadow); }
+  .confirm-box p{ margin:0 0 18px; font-size:14.5px; line-height:1.6; }
+  .confirm-actions{ display:flex; justify-content:flex-end; gap:10px; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:var(--bg); padding:11px 20px; border-radius:999px; font-size:13.5px; font-weight:600; opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; z-index:300; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:480px){
+    .detail-top{ flex-direction:column; }
+    .detail-thumb{ width:120px; height:160px; }
+    .row2, .row3, .settings-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="brand-mark">🎴</span>キャラクター図鑑</div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <span class="count-pill" id="countPill">0件</span>
+      <button class="btn btn-sm" id="exportBtn" title="登録内容をJSONファイルとして保存します">📤 書き出し</button>
+      <button class="btn btn-sm" id="importBtn" title="JSONファイルから登録内容を読み込みます">📥 読み込み</button>
+      <input type="file" id="importFileInput" accept="application/json,.json" style="display:none;">
+      <button class="btn btn-primary" id="openAddBtn">＋ 新規登録</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="search-row">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="名前・タグ・モデル名で検索">
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="date-desc">登録日：新しい順</option>
+        <option value="date-asc">登録日：古い順</option>
+        <option value="name-asc">名前：A→Z / あ→ん</option>
+        <option value="name-desc">名前：Z→A / ん→あ</option>
+      </select>
+    </div>
+    <div class="tag-filter-row" id="tagFilterRow"></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="empty" id="emptyState" style="display:none;">
+    <div class="icon">🗂️</div>
+    <p id="emptyText">まだ何も登録されていません。<br>「＋ 新規登録」から最初のキャラクターを追加しましょう。</p>
+  </div>
+</div>
+
+<!-- Add / Edit modal -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="formTitle">新規登録</h2>
+      <button class="icon-btn" id="formCloseBtn">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section">
+        <h3>サムネイル・基本情報</h3>
+        <div class="field">
+          <label>サムネイル画像</label>
+          <div class="thumb-picker">
+            <div class="thumb-preview" id="thumbPreview"><span class="placeholder">🖼️</span></div>
+            <div class="thumb-picker-actions">
+              <button class="btn btn-sm" id="pickImageBtn">画像を選択</button>
+              <button class="btn btn-sm btn-ghost" id="removeImageBtn" style="display:none;">画像を削除</button>
+              <input type="file" id="imageInput" accept="image/*">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>名前</label>
+          <input type="text" id="nameInput" placeholder="例：レン / 図書室の青年">
+        </div>
+        <div class="field">
+          <label>キャラクタータグ</label>
+          <div class="chip-editor" id="tagEditor">
+            <input type="text" id="tagInput" placeholder="タグを入力してEnter">
+          </div>
+          <div class="field-hint">一覧の絞り込みに使う分類タグです（例：中性的、幼馴染、和風）</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>プロンプト</h3>
+        <div class="paste-row">
+          <label style="font-size:13px; font-weight:700; color:var(--text-muted);">プロンプトを貼り付け</label>
+          <textarea id="pastePromptInput" placeholder="masterpiece, best quality, 1boy, solo, ..."></textarea>
+          <button class="btn btn-sm" id="splitPromptBtn" style="align-self:flex-start;">タグに分割して追加</button>
+          <div class="field-hint">カンマ区切りのタグに分割し、下のリストに追加します（既存のタグは残ります）</div>
+        </div>
+
+        <div class="category-manager">
+          <label>カテゴリ一覧（各タグの振り分け先）</label>
+          <div class="chip-editor" id="categoryEditor">
+            <input type="text" id="categoryInput" placeholder="カテゴリ名を入力してEnter（例：背景）">
+          </div>
+          <div class="auto-classify-row">
+            <label class="auto-classify-check"><input type="checkbox" id="autoClassifyToggle"> タグの追加時にカテゴリを自動推測する</label>
+            <button class="add-row-btn" id="reclassifyBtn" type="button">未分類のタグを再判定</button>
+          </div>
+          <div class="field-hint">キーワード辞書による簡易的な推測です（例：shirt/skirt→服装、background/forest→背景）。既定のカテゴリ名を使っている場合に効果があります。判定後も手動で修正できます。</div>
+        </div>
+
+        <div class="prompt-tag-list" id="promptTagList"></div>
+        <div class="prompt-empty-hint" id="promptEmptyHint">まだタグがありません。プロンプトを貼り付けて分割するか、下から手動で追加してください。</div>
+
+        <div class="manual-tag-add">
+          <input type="text" id="manualTagInput" placeholder="タグを手動で追加">
+          <select id="manualTagCategory"></select>
+          <button class="btn btn-sm" id="manualTagAddBtn">追加</button>
+        </div>
+
+        <div class="prompt-preview">
+          <div class="prompt-preview-head">
+            <span>プレビュー（全文）</span>
+            <button class="copy-btn" id="previewCopyBtn">コピー</button>
+          </div>
+          <div class="prompt-preview-box" id="promptPreviewBox">（タグなし）</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>ネガティブプロンプト</h3>
+        <div class="field">
+          <textarea id="negativeInput" placeholder="lowres, bad anatomy, bad hands, ..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>生成設定</h3>
+        <div class="row2">
+          <div class="field">
+            <label>モデル</label>
+            <input type="text" id="modelInput" placeholder="例：coco-Illust (SDXL)">
+          </div>
+          <div class="field">
+            <label>サンプラー</label>
+            <input type="text" id="samplerInput" placeholder="例：Euler a">
+          </div>
+        </div>
+        <div class="field">
+          <label>LoRA</label>
+          <div class="lora-list" id="loraList"></div>
+          <button class="add-row-btn" id="addLoraBtn">＋ LoRAを追加</button>
+        </div>
+        <div class="row3">
+          <div class="field">
+            <label>ステップ数</label>
+            <input type="text" id="stepsInput" placeholder="例：30">
+          </div>
+          <div class="field">
+            <label>CFG Scale</label>
+            <input type="text" id="cfgInput" placeholder="例：5.0">
+          </div>
+          <div class="field">
+            <label>シード値</label>
+            <input type="text" id="seedInput" placeholder="例：851105892083...">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>サイズ（縦横比）</label>
+            <input type="text" id="sizeInput" placeholder="例：768 x 1280">
+          </div>
+          <div class="field">
+            <label>生成にかかった時間</label>
+            <input type="text" id="genTimeInput" placeholder="例：46秒">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>メモ</h3>
+        <div class="field">
+          <textarea id="notesInput" placeholder="その他、自由に残したいメモ"></textarea>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="formCancelBtn">キャンセル</button>
+      <button class="btn btn-primary" id="formSaveBtn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>詳細</h2>
+      <button class="icon-btn" id="detailCloseBtn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-top">
+        <div class="detail-thumb" id="detailThumb"></div>
+        <div class="detail-meta">
+          <h3 id="detailName"></h3>
+          <div class="detail-tags" id="detailTags"></div>
+          <div class="detail-date" id="detailDate"></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>プロンプト <button class="copy-btn" id="detailPromptCopyBtn">全文コピー</button></h4>
+        <div class="prompt-groups" id="detailPromptGroups"></div>
+      </div>
+
+      <div class="detail-section">
+        <h4>ネガティブプロンプト <button class="copy-btn" id="detailNegativeCopyBtn">コピー</button></h4>
+        <div class="detail-pre" id="detailNegative"></div>
+      </div>
+
+      <div class="detail-section">
+        <h4>生成設定</h4>
+        <div class="settings-grid" id="detailSettingsGrid"></div>
+      </div>
+
+      <div class="detail-section" id="detailNotesSection">
+        <h4>メモ</h4>
+        <div class="detail-pre" id="detailNotes"></div>
+      </div>
+    </div>
+    <div class="modal-foot" style="justify-content:space-between;">
+      <button class="btn btn-danger" id="detailDeleteBtn">削除</button>
+      <button class="btn btn-primary" id="detailEditBtn">編集する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p>この登録内容を削除します。この操作は取り消せません。よろしいですか？</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirmCancelBtn">キャンセル</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import confirm -->
+<div class="confirm-overlay" id="importConfirmOverlay">
+  <div class="confirm-box">
+    <p id="importConfirmText">読み込むファイルの件数を確認しています…</p>
+    <div class="confirm-actions" style="flex-wrap:wrap;">
+      <button class="btn btn-ghost" id="importCancelBtn">キャンセル</button>
+      <button class="btn btn-sm" id="importMergeBtn">既存に追加する</button>
+      <button class="btn btn-danger" id="importReplaceBtn">全て置き換える</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Constants ----------
+  const UNSORTED = "未分類";
+  const DEFAULT_CATEGORIES = ["基本/画質","人物","表情","服装","ポーズ","背景","その他"];
+  const CATEGORY_KEY = "char_lib_categories_v1";
+  const AUTO_CLASSIFY_KEY = "char_lib_auto_classify_v1";
+
+  // Keyword dictionary for rule-based category guessing. Keys must match category
+  // names for the guess to apply — matching is a simple lowercase substring check,
+  // so it works best with the default category names.
+  const KEYWORD_MAP = {
+    "基本/画質": ["masterpiece","best quality","high quality","normal quality","low quality","worst quality","highres","hires","ultra-detailed","extremely detailed","absurdres","8k","4k","amazing quality"],
+    "人物": ["1girl","1boy","2girls","2boys","solo","multiple girls","multiple boys","1other","male focus","female focus","adult","young adult","teen","child","mature","androgynous","bishounen","bishoujo","single character","1other"," man"," woman"," boy"," girl"],
+    "表情": ["smile","smiling","laughing","crying","tears","blush","expressionless","frown","angry","surprised","embarrassed","closed eyes","open mouth","closed mouth","smirk","grin","expression"," sad"," happy"],
+    "服装": ["shirt","jacket","coat","dress","skirt","pants","jeans","hoodie","sweater","uniform","suit","necktie"," tie","scarf","gloves","hat","cap","glasses","earrings","necklace","choker","boots","shoes","sandals","socks","stockings","thighhighs","apron","robe","kimono","yukata","armor","cape","hood","collar","belt","vest","sleeveless","bare shoulders","off shoulder","turtleneck","cardigan","cigarette","jewelry"],
+    "ポーズ": ["standing","sitting","lying","crouching","kneeling","running","jumping","looking at viewer","looking back","looking away","arms crossed","hand on hip","leaning","reaching","pointing","walking","from behind","from side","from above","from below","close-up","upper body","full body","cowboy shot","dynamic pose","action pose"],
+    "背景": ["background","indoors","outdoors","sky","clouds","forest","cityscape","street","room","bedroom","classroom","library","night","daytime","sunset","sunlight","rain","snow","window","simple background","white background","black background","gradient background","nature","beach","ocean","garden","school","cafe","building","starry sky","moon"]
+  };
+  function guessCategory(tagText){
+    const norm = " " + tagText.toLowerCase().replace(/_/g, " ") + " ";
+    for (const cat of categories){
+      const keywords = KEYWORD_MAP[cat];
+      if (!keywords) continue;
+      if (keywords.some(k => norm.includes(k))) return cat;
+    }
+    return null;
+  }
+
+  // ---------- IndexedDB helpers ----------
+  const DB_NAME = "character_library_db";
+  const STORE = "entries";
+  let dbPromise = null;
+
+  function openDB(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE)){
+          const store = db.createObjectStore(STORE, { keyPath: "id" });
+          store.createIndex("createdAt", "createdAt");
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = (e) => reject(e.target.error);
+    });
+    return dbPromise;
+  }
+  async function dbGetAll(){
+    try{
+      const db = await openDB();
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, "readonly");
+        const req = tx.objectStore(STORE).getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+    }catch(err){ console.error("dbGetAll failed", err); return []; }
+  }
+  async function dbPut(entry){
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).put(entry);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function dbDelete(id){
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  // ---------- Category storage (localStorage) ----------
+  function loadCategories(){
+    try{
+      const raw = localStorage.getItem(CATEGORY_KEY);
+      if (raw){
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) return parsed;
+      }
+    }catch(e){}
+    return [...DEFAULT_CATEGORIES];
+  }
+  function saveCategories(list){
+    try{ localStorage.setItem(CATEGORY_KEY, JSON.stringify(list)); }catch(e){}
+  }
+  let categories = loadCategories();
+
+  function loadAutoClassify(){
+    try{ return localStorage.getItem(AUTO_CLASSIFY_KEY) !== "off"; }catch(e){ return true; }
+  }
+  function saveAutoClassify(on){
+    try{ localStorage.setItem(AUTO_CLASSIFY_KEY, on ? "on" : "off"); }catch(e){}
+  }
+  let autoClassifyEnabled = loadAutoClassify();
+
+  // ---------- State ----------
+  let entries = [];
+  let activeTags = new Set();
+  let searchQuery = "";
+  let sortMode = "date-desc";
+  let editingId = null;
+  let currentTags = [];
+  let currentThumb = null;
+  let currentPromptTags = [];   // [{id, text, category}]
+  let currentLoras = [];        // [{name, strength}]
+  let detailEntryId = null;
+
+  // ---------- Elements ----------
+  const grid = document.getElementById("grid");
+  const emptyState = document.getElementById("emptyState");
+  const emptyText = document.getElementById("emptyText");
+  const countPill = document.getElementById("countPill");
+  const tagFilterRow = document.getElementById("tagFilterRow");
+  const searchInput = document.getElementById("searchInput");
+  const sortSelect = document.getElementById("sortSelect");
+
+  const formOverlay = document.getElementById("formOverlay");
+  const formTitle = document.getElementById("formTitle");
+  const nameInput = document.getElementById("nameInput");
+  const negativeInput = document.getElementById("negativeInput");
+  const notesInput = document.getElementById("notesInput");
+  const modelInput = document.getElementById("modelInput");
+  const samplerInput = document.getElementById("samplerInput");
+  const stepsInput = document.getElementById("stepsInput");
+  const cfgInput = document.getElementById("cfgInput");
+  const seedInput = document.getElementById("seedInput");
+  const sizeInput = document.getElementById("sizeInput");
+  const genTimeInput = document.getElementById("genTimeInput");
+
+  const tagEditor = document.getElementById("tagEditor");
+  const tagInput = document.getElementById("tagInput");
+  const thumbPreview = document.getElementById("thumbPreview");
+  const imageInput = document.getElementById("imageInput");
+  const removeImageBtn = document.getElementById("removeImageBtn");
+
+  const categoryEditor = document.getElementById("categoryEditor");
+  const categoryInput = document.getElementById("categoryInput");
+  const pastePromptInput = document.getElementById("pastePromptInput");
+  const promptTagList = document.getElementById("promptTagList");
+  const promptEmptyHint = document.getElementById("promptEmptyHint");
+  const manualTagInput = document.getElementById("manualTagInput");
+  const manualTagCategory = document.getElementById("manualTagCategory");
+  const promptPreviewBox = document.getElementById("promptPreviewBox");
+  const loraList = document.getElementById("loraList");
+
+  const detailOverlay = document.getElementById("detailOverlay");
+  const detailThumb = document.getElementById("detailThumb");
+  const detailName = document.getElementById("detailName");
+  const detailTags = document.getElementById("detailTags");
+  const detailDate = document.getElementById("detailDate");
+  const detailPromptGroups = document.getElementById("detailPromptGroups");
+  const detailNegative = document.getElementById("detailNegative");
+  const detailSettingsGrid = document.getElementById("detailSettingsGrid");
+  const detailNotesSection = document.getElementById("detailNotesSection");
+  const detailNotes = document.getElementById("detailNotes");
+
+  const confirmOverlay = document.getElementById("confirmOverlay");
+  const toast = document.getElementById("toast");
+
+  // ---------- Utilities ----------
+  function uid(){ return "e_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8); }
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove("show"), 2000);
+  }
+  function escapeHtml(str){
+    return (str || "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  }
+  function formatDate(ts){
+    const d = new Date(ts);
+    return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日 " +
+      String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  }
+  async function copyText(text){
+    if (!text){ showToast("コピーする内容がありません"); return; }
+    try{ await navigator.clipboard.writeText(text); showToast("コピーしました"); }
+    catch(err){ showToast("コピーに失敗しました"); }
+  }
+  function resizeImage(file, maxDim){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > height && width > maxDim){ height = Math.round(height * (maxDim / width)); width = maxDim; }
+          else if (height >= width && height > maxDim){ width = Math.round(width * (maxDim / height)); height = maxDim; }
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  // split a comma separated prompt string on top-level commas only (ignores commas inside (), [], {})
+  function splitTopLevel(str){
+    const result = [];
+    let depth = 0, current = "";
+    for (const ch of str){
+      if ("([{".includes(ch)) depth++;
+      if (")]}".includes(ch)) depth = Math.max(0, depth - 1);
+      if (ch === "," && depth === 0){ result.push(current.trim()); current = ""; }
+      else current += ch;
+    }
+    if (current.trim()) result.push(current.trim());
+    return result.filter(Boolean);
+  }
+
+  // ---------- Character tag editor (chip-editor reusable pattern) ----------
+  function renderTagEditor(){
+    tagEditor.querySelectorAll(".chip-editor-chip").forEach(el => el.remove());
+    currentTags.forEach((tag, idx) => {
+      const chip = document.createElement("span");
+      chip.className = "chip-editor-chip";
+      chip.innerHTML = `${escapeHtml(tag)} <button type="button">✕</button>`;
+      chip.querySelector("button").addEventListener("click", () => { currentTags.splice(idx,1); renderTagEditor(); });
+      tagEditor.insertBefore(chip, tagInput);
+    });
+  }
+  function addTagFromInput(){
+    const raw = tagInput.value.trim().replace(/,$/, "");
+    if (raw && !currentTags.includes(raw)){ currentTags.push(raw); renderTagEditor(); }
+    tagInput.value = "";
+  }
+  tagInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === ","){ e.preventDefault(); addTagFromInput(); }
+    else if (e.key === "Backspace" && tagInput.value === "" && currentTags.length){ currentTags.pop(); renderTagEditor(); }
+  });
+  tagInput.addEventListener("blur", () => { if (tagInput.value.trim()) addTagFromInput(); });
+
+  // ---------- Category editor (global, persisted) ----------
+  function renderCategoryEditor(){
+    categoryEditor.querySelectorAll(".chip-editor-chip").forEach(el => el.remove());
+    categories.forEach((cat, idx) => {
+      const chip = document.createElement("span");
+      chip.className = "chip-editor-chip";
+      chip.innerHTML = `${escapeHtml(cat)} <button type="button">✕</button>`;
+      chip.querySelector("button").addEventListener("click", () => {
+        categories.splice(idx, 1);
+        saveCategories(categories);
+        // any prompt tags using the removed category fall back to 未分類
+        currentPromptTags.forEach(t => { if (t.category === cat) t.category = UNSORTED; });
+        renderCategoryEditor();
+        renderPromptTagList();
+        renderCategorySelectOptions(manualTagCategory);
+      });
+      categoryEditor.insertBefore(chip, categoryInput);
+    });
+  }
+  function addCategoryFromInput(){
+    const raw = categoryInput.value.trim().replace(/,$/, "");
+    if (raw && raw !== UNSORTED && !categories.includes(raw)){
+      categories.push(raw);
+      saveCategories(categories);
+      renderCategoryEditor();
+      renderCategorySelectOptions(manualTagCategory);
+      renderPromptTagList();
+    }
+    categoryInput.value = "";
+  }
+  categoryInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === ","){ e.preventDefault(); addCategoryFromInput(); }
+    else if (e.key === "Backspace" && categoryInput.value === "" && categories.length){
+      const removed = categories.pop();
+      saveCategories(categories);
+      currentPromptTags.forEach(t => { if (t.category === removed) t.category = UNSORTED; });
+      renderCategoryEditor();
+      renderPromptTagList();
+      renderCategorySelectOptions(manualTagCategory);
+    }
+  });
+  categoryInput.addEventListener("blur", () => { if (categoryInput.value.trim()) addCategoryFromInput(); });
+
+  function renderCategorySelectOptions(selectEl){
+    const current = selectEl.value;
+    selectEl.innerHTML = "";
+    [UNSORTED, ...categories].forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat; opt.textContent = cat;
+      selectEl.appendChild(opt);
+    });
+    if ([UNSORTED, ...categories].includes(current)) selectEl.value = current;
+  }
+
+  // ---------- Prompt tag list (per-entry) ----------
+  function renderPromptTagList(){
+    promptTagList.innerHTML = "";
+    promptEmptyHint.style.display = currentPromptTags.length ? "none" : "block";
+    currentPromptTags.forEach((tagObj, idx) => {
+      const row = document.createElement("div");
+      row.className = "prompt-tag-row";
+      const span = document.createElement("span");
+      span.className = "prompt-tag-text";
+      span.textContent = tagObj.text;
+      const select = document.createElement("select");
+      renderCategorySelectOptions(select);
+      select.value = tagObj.category || UNSORTED;
+      select.addEventListener("change", () => { tagObj.category = select.value; renderPromptPreview(); });
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "remove-row";
+      removeBtn.textContent = "✕";
+      removeBtn.addEventListener("click", () => {
+        currentPromptTags.splice(idx, 1);
+        renderPromptTagList();
+        renderPromptPreview();
+      });
+      row.appendChild(span); row.appendChild(select); row.appendChild(removeBtn);
+      promptTagList.appendChild(row);
+    });
+    renderPromptPreview();
+  }
+  function renderPromptPreview(){
+    const text = currentPromptTags.map(t => t.text).join(", ");
+    promptPreviewBox.textContent = text || "（タグなし）";
+  }
+
+  document.getElementById("splitPromptBtn").addEventListener("click", () => {
+    const raw = pastePromptInput.value;
+    if (!raw.trim()){ showToast("プロンプトを入力してください"); return; }
+    const parts = splitTopLevel(raw);
+    let added = 0;
+    parts.forEach(text => {
+      if (!currentPromptTags.some(t => t.text === text)){
+        const category = (autoClassifyEnabled && guessCategory(text)) || UNSORTED;
+        currentPromptTags.push({ id: uid(), text, category });
+        added++;
+      }
+    });
+    pastePromptInput.value = "";
+    renderPromptTagList();
+    showToast(added ? `${added}件のタグを追加しました` : "追加できる新しいタグがありませんでした");
+  });
+
+  document.getElementById("autoClassifyToggle").addEventListener("change", (e) => {
+    autoClassifyEnabled = e.target.checked;
+    saveAutoClassify(autoClassifyEnabled);
+  });
+
+  document.getElementById("reclassifyBtn").addEventListener("click", () => {
+    let changed = 0;
+    currentPromptTags.forEach(t => {
+      if (t.category === UNSORTED){
+        const guess = guessCategory(t.text);
+        if (guess){ t.category = guess; changed++; }
+      }
+    });
+    renderPromptTagList();
+    showToast(changed ? `${changed}件のタグを再判定しました` : "推測できるタグがありませんでした");
+  });
+
+  document.getElementById("manualTagAddBtn").addEventListener("click", () => {
+    const text = manualTagInput.value.trim().replace(/,$/, "");
+    if (!text){ return; }
+    if (currentPromptTags.some(t => t.text === text)){ showToast("同じタグが既にあります"); return; }
+    let category = manualTagCategory.value || UNSORTED;
+    if (category === UNSORTED && autoClassifyEnabled){
+      category = guessCategory(text) || UNSORTED;
+    }
+    currentPromptTags.push({ id: uid(), text, category });
+    manualTagInput.value = "";
+    renderPromptTagList();
+  });
+  manualTagInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter"){ e.preventDefault(); document.getElementById("manualTagAddBtn").click(); }
+  });
+
+  document.getElementById("previewCopyBtn").addEventListener("click", () => {
+    copyText(currentPromptTags.map(t => t.text).join(", "));
+  });
+
+  // ---------- LoRA rows ----------
+  function renderLoraList(){
+    loraList.innerHTML = "";
+    currentLoras.forEach((lora, idx) => {
+      const row = document.createElement("div");
+      row.className = "lora-row";
+      row.innerHTML = `
+        <input type="text" placeholder="LoRA名" value="${escapeHtml(lora.name)}">
+        <input type="text" class="strength" placeholder="強さ" value="${escapeHtml(lora.strength)}">
+        <button type="button" class="remove-row">✕</button>
+      `;
+      const [nameEl, strengthEl] = row.querySelectorAll("input");
+      nameEl.addEventListener("input", () => { lora.name = nameEl.value; });
+      strengthEl.addEventListener("input", () => { lora.strength = strengthEl.value; });
+      row.querySelector(".remove-row").addEventListener("click", () => {
+        currentLoras.splice(idx, 1);
+        renderLoraList();
+      });
+      loraList.appendChild(row);
+    });
+  }
+  document.getElementById("addLoraBtn").addEventListener("click", () => {
+    currentLoras.push({ name: "", strength: "" });
+    renderLoraList();
+  });
+
+  // ---------- Form modal open/close ----------
+  function openForm(entry){
+    editingId = entry ? entry.id : null;
+    formTitle.textContent = entry ? "登録内容を編集" : "新規登録";
+    nameInput.value = entry ? entry.name : "";
+    negativeInput.value = entry ? entry.negative : "";
+    notesInput.value = entry ? entry.notes : "";
+    modelInput.value = entry ? (entry.model || "") : "";
+    samplerInput.value = entry ? (entry.sampler || "") : "";
+    stepsInput.value = entry ? (entry.steps || "") : "";
+    cfgInput.value = entry ? (entry.cfgScale || "") : "";
+    seedInput.value = entry ? (entry.seed || "") : "";
+    sizeInput.value = entry ? (entry.size || "") : "";
+    genTimeInput.value = entry ? (entry.genTime || "") : "";
+    currentTags = entry ? [...entry.tags] : [];
+    currentThumb = entry ? entry.thumb : null;
+    currentLoras = entry && entry.loras ? entry.loras.map(l => ({...l})) : [];
+    currentPromptTags = entry && entry.promptTags ? entry.promptTags.map(t => ({...t})) : [];
+    pastePromptInput.value = "";
+    renderTagEditor();
+    renderThumbPreview();
+    renderLoraList();
+    renderCategorySelectOptions(manualTagCategory);
+    renderPromptTagList();
+    document.getElementById("autoClassifyToggle").checked = autoClassifyEnabled;
+    formOverlay.classList.add("open");
+    setTimeout(() => nameInput.focus(), 50);
+  }
+  function closeForm(){ formOverlay.classList.remove("open"); imageInput.value = ""; }
+  function renderThumbPreview(){
+    if (currentThumb){
+      thumbPreview.innerHTML = `<img src="${currentThumb}" alt="">`;
+      removeImageBtn.style.display = "";
+    } else {
+      thumbPreview.innerHTML = `<span class="placeholder">🖼️</span>`;
+      removeImageBtn.style.display = "none";
+    }
+  }
+
+  document.getElementById("openAddBtn").addEventListener("click", () => openForm(null));
+  document.getElementById("formCloseBtn").addEventListener("click", closeForm);
+  document.getElementById("formCancelBtn").addEventListener("click", closeForm);
+  formOverlay.addEventListener("click", (e) => { if (e.target === formOverlay) closeForm(); });
+
+  document.getElementById("pickImageBtn").addEventListener("click", () => imageInput.click());
+  document.getElementById("removeImageBtn").addEventListener("click", () => { currentThumb = null; renderThumbPreview(); });
+  imageInput.addEventListener("change", async () => {
+    const file = imageInput.files[0];
+    if (!file) return;
+    try{ currentThumb = await resizeImage(file, 640); renderThumbPreview(); }
+    catch(err){ console.error(err); showToast("画像の読み込みに失敗しました"); }
+  });
+
+  document.getElementById("formSaveBtn").addEventListener("click", async () => {
+    if (tagInput.value.trim()) addTagFromInput();
+    if (categoryInput.value.trim()) addCategoryFromInput();
+    const name = nameInput.value.trim();
+    if (!name){ showToast("名前を入力してください"); nameInput.focus(); return; }
+    const now = Date.now();
+    const cleanedLoras = currentLoras.filter(l => l.name.trim() || l.strength.trim())
+      .map(l => ({ name: l.name.trim(), strength: l.strength.trim() }));
+    const entry = {
+      id: editingId || uid(),
+      name,
+      tags: currentTags,
+      promptTags: currentPromptTags,
+      negative: negativeInput.value.trim(),
+      notes: notesInput.value.trim(),
+      model: modelInput.value.trim(),
+      sampler: samplerInput.value.trim(),
+      steps: stepsInput.value.trim(),
+      cfgScale: cfgInput.value.trim(),
+      seed: seedInput.value.trim(),
+      size: sizeInput.value.trim(),
+      genTime: genTimeInput.value.trim(),
+      loras: cleanedLoras,
+      thumb: currentThumb,
+      createdAt: editingId ? (entries.find(x => x.id === editingId)?.createdAt || now) : now,
+      updatedAt: now
+    };
+    await dbPut(entry);
+    await loadEntries();
+    closeForm();
+    showToast(editingId ? "更新しました" : "登録しました");
+  });
+
+  // ---------- Detail modal ----------
+  function groupPromptTags(promptTags){
+    const order = [...categories, UNSORTED];
+    const groups = {};
+    (promptTags || []).forEach(t => {
+      const cat = order.includes(t.category) ? t.category : UNSORTED;
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(t.text);
+    });
+    return order.filter(cat => groups[cat] && groups[cat].length).map(cat => ({ category: cat, tags: groups[cat] }));
+  }
+
+  function openDetail(entry){
+    detailEntryId = entry.id;
+    detailThumb.innerHTML = entry.thumb ? `<img src="${entry.thumb}" alt="">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:30px;opacity:.35;">🖼️</div>`;
+    detailName.textContent = entry.name;
+    detailTags.innerHTML = entry.tags.length ? entry.tags.map(t => `<span class="mini-tag">${escapeHtml(t)}</span>`).join("") : `<span class="mini-tag">タグなし</span>`;
+    detailDate.textContent = "登録日：" + formatDate(entry.createdAt);
+
+    const groups = groupPromptTags(entry.promptTags);
+    detailPromptGroups.innerHTML = groups.length
+      ? groups.map(g => `
+          <div class="prompt-group">
+            <div class="prompt-group-title">${escapeHtml(g.category)}</div>
+            <div class="prompt-group-tags">${g.tags.map(t => `<span class="mini-tag">${escapeHtml(t)}</span>`).join("")}</div>
+          </div>`).join("")
+      : `<div class="detail-pre empty-note">プロンプトは登録されていません</div>`;
+
+    detailNegative.textContent = entry.negative || "ネガティブプロンプトは登録されていません";
+    detailNegative.className = "detail-pre" + (entry.negative ? "" : " empty-note");
+
+    const settingsItems = [
+      ["モデル", entry.model],
+      ["サンプラー", entry.sampler],
+      ["ステップ数", entry.steps],
+      ["CFG Scale", entry.cfgScale],
+      ["シード値", entry.seed],
+      ["サイズ", entry.size],
+      ["生成時間", entry.genTime],
+    ].filter(([,v]) => v);
+    let html = settingsItems.map(([k,v]) => `<div class="item"><div class="k">${escapeHtml(k)}</div><div class="v">${escapeHtml(v)}</div></div>`).join("");
+    if (entry.loras && entry.loras.length){
+      html += `<div class="item" style="grid-column:1/-1;"><div class="k">LoRA</div><div class="lora-chip-list">${
+        entry.loras.map(l => `<span class="lora-chip">${escapeHtml(l.name)}${l.strength ? " (" + escapeHtml(l.strength) + ")" : ""}</span>`).join("")
+      }</div></div>`;
+    }
+    detailSettingsGrid.innerHTML = html || `<div class="detail-pre empty-note" style="grid-column:1/-1;">生成設定は登録されていません</div>`;
+
+    if (entry.notes){
+      detailNotesSection.style.display = "";
+      detailNotes.textContent = entry.notes;
+      detailNotes.className = "detail-pre";
+    } else {
+      detailNotesSection.style.display = "none";
+    }
+
+    detailOverlay.classList.add("open");
+  }
+  function closeDetail(){ detailOverlay.classList.remove("open"); detailEntryId = null; }
+
+  document.getElementById("detailCloseBtn").addEventListener("click", closeDetail);
+  detailOverlay.addEventListener("click", (e) => { if (e.target === detailOverlay) closeDetail(); });
+  document.getElementById("detailEditBtn").addEventListener("click", () => {
+    const entry = entries.find(x => x.id === detailEntryId);
+    closeDetail();
+    if (entry) openForm(entry);
+  });
+  document.getElementById("detailPromptCopyBtn").addEventListener("click", () => {
+    const entry = entries.find(x => x.id === detailEntryId);
+    if (entry) copyText((entry.promptTags || []).map(t => t.text).join(", "));
+  });
+  document.getElementById("detailNegativeCopyBtn").addEventListener("click", () => {
+    const entry = entries.find(x => x.id === detailEntryId);
+    if (entry) copyText(entry.negative);
+  });
+
+  // ---------- Delete confirm ----------
+  let pendingDeleteId = null;
+  document.getElementById("detailDeleteBtn").addEventListener("click", () => {
+    pendingDeleteId = detailEntryId;
+    confirmOverlay.classList.add("open");
+  });
+  document.getElementById("confirmCancelBtn").addEventListener("click", () => { confirmOverlay.classList.remove("open"); pendingDeleteId = null; });
+  document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
+    if (pendingDeleteId){ await dbDelete(pendingDeleteId); await loadEntries(); showToast("削除しました"); }
+    confirmOverlay.classList.remove("open");
+    pendingDeleteId = null;
+    closeDetail();
+  });
+  confirmOverlay.addEventListener("click", (e) => { if (e.target === confirmOverlay){ confirmOverlay.classList.remove("open"); pendingDeleteId = null; } });
+
+  // ---------- Filtering / sorting / rendering (list) ----------
+  function getAllTags(){
+    const set = new Set();
+    entries.forEach(e => e.tags.forEach(t => set.add(t)));
+    return [...set].sort((a,b) => a.localeCompare(b, "ja"));
+  }
+  function renderTagFilterRow(){
+    const tags = getAllTags();
+    tagFilterRow.innerHTML = "";
+    tags.forEach(tag => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "tag-chip" + (activeTags.has(tag) ? " active" : "");
+      chip.textContent = tag;
+      chip.addEventListener("click", () => {
+        if (activeTags.has(tag)) activeTags.delete(tag); else activeTags.add(tag);
+        renderTagFilterRow(); renderGrid();
+      });
+      tagFilterRow.appendChild(chip);
+    });
+    if (activeTags.size){
+      const clearBtn = document.createElement("button");
+      clearBtn.className = "clear-filters";
+      clearBtn.textContent = "絞り込みを解除";
+      clearBtn.addEventListener("click", () => { activeTags.clear(); renderTagFilterRow(); renderGrid(); });
+      tagFilterRow.appendChild(clearBtn);
+    }
+  }
+  function getFiltered(){
+    const q = searchQuery.trim().toLowerCase();
+    let list = entries.filter(e => {
+      const matchesSearch = !q ||
+        e.name.toLowerCase().includes(q) ||
+        e.tags.some(t => t.toLowerCase().includes(q)) ||
+        (e.model || "").toLowerCase().includes(q);
+      const matchesTags = activeTags.size === 0 || e.tags.some(t => activeTags.has(t));
+      return matchesSearch && matchesTags;
+    });
+    list.sort((a,b) => {
+      switch(sortMode){
+        case "date-asc": return a.createdAt - b.createdAt;
+        case "name-asc": return a.name.localeCompare(b.name, "ja");
+        case "name-desc": return b.name.localeCompare(a.name, "ja");
+        case "date-desc": default: return b.createdAt - a.createdAt;
+      }
+    });
+    return list;
+  }
+  function renderGrid(){
+    const list = getFiltered();
+    countPill.textContent = entries.length + "件";
+    grid.innerHTML = "";
+    if (entries.length === 0){
+      emptyState.style.display = "flex";
+      emptyText.innerHTML = "まだ何も登録されていません。<br>「＋ 新規登録」から最初のキャラクターを追加しましょう。";
+      return;
+    }
+    if (list.length === 0){
+      emptyState.style.display = "flex";
+      emptyText.innerHTML = "条件に一致する登録がありません。";
+      return;
+    }
+    emptyState.style.display = "none";
+    list.forEach(entry => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "card";
+      const thumbHtml = entry.thumb ? `<img src="${entry.thumb}" alt="${escapeHtml(entry.name)}">` : `<span class="placeholder">🖼️</span>`;
+      const tagsHtml = entry.tags.slice(0,3).map(t => `<span class="mini-tag">${escapeHtml(t)}</span>`).join("");
+      card.innerHTML = `
+        <div class="thumb">${thumbHtml}</div>
+        <div class="card-body">
+          <div class="card-name">${escapeHtml(entry.name)}</div>
+          ${entry.model ? `<div class="card-model">${escapeHtml(entry.model)}</div>` : ""}
+          <div class="card-tags">${tagsHtml}</div>
+        </div>
+      `;
+      card.addEventListener("click", () => openDetail(entry));
+      grid.appendChild(card);
+    });
+  }
+
+  searchInput.addEventListener("input", () => { searchQuery = searchInput.value; renderGrid(); });
+  sortSelect.addEventListener("change", () => { sortMode = sortSelect.value; renderGrid(); });
+
+  // ---------- Migration for legacy entries (plain "prompt" string) ----------
+  function migrateEntry(e){
+    if (!e.promptTags && typeof e.prompt === "string"){
+      e.promptTags = splitTopLevel(e.prompt).map(text => ({ id: uid(), text, category: UNSORTED }));
+    }
+    if (!e.promptTags) e.promptTags = [];
+    if (!e.loras) e.loras = [];
+    if (!e.tags) e.tags = [];
+    return e;
+  }
+
+  // ---------- Load ----------
+  async function loadEntries(){
+    const raw = await dbGetAll();
+    entries = raw.map(migrateEntry);
+    renderTagFilterRow();
+    renderGrid();
+  }
+
+  // ---------- Export / Import (JSON backup) ----------
+  const importFileInput = document.getElementById("importFileInput");
+  const importConfirmOverlay = document.getElementById("importConfirmOverlay");
+  const importConfirmText = document.getElementById("importConfirmText");
+  let pendingImportData = null;
+
+  document.getElementById("exportBtn").addEventListener("click", async () => {
+    const allEntries = await dbGetAll();
+    const data = {
+      app: "character-library-backup",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      categories,
+      autoClassify: autoClassifyEnabled,
+      entries: allEntries.map(migrateEntry)
+    };
+    try{
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `character-library-backup-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showToast(`${data.entries.length}件を書き出しました`);
+    }catch(err){
+      console.error(err);
+      showToast("書き出しに失敗しました");
+    }
+  });
+
+  document.getElementById("importBtn").addEventListener("click", () => importFileInput.click());
+
+  importFileInput.addEventListener("change", async () => {
+    const file = importFileInput.files[0];
+    if (!file) return;
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data || !Array.isArray(data.entries)) throw new Error("invalid format");
+      pendingImportData = data;
+      importConfirmText.textContent =
+        `このファイルには ${data.entries.length}件 の登録が含まれています。` +
+        `現在の登録（${entries.length}件）に追加しますか、それとも全て置き換えますか？`;
+      importConfirmOverlay.classList.add("open");
+    }catch(err){
+      console.error(err);
+      showToast("読み込みに失敗しました。JSONファイルの形式を確認してください");
+    }finally{
+      importFileInput.value = "";
+    }
+  });
+
+  async function performImport(mode){
+    const data = pendingImportData;
+    if (!data) return;
+    if (mode === "replace"){
+      const existing = await dbGetAll();
+      for (const e of existing) await dbDelete(e.id);
+    }
+    for (const rawEntry of data.entries){
+      const normalized = migrateEntry({ ...rawEntry });
+      if (!normalized.id) normalized.id = uid();
+      await dbPut(normalized);
+    }
+    if (Array.isArray(data.categories) && data.categories.length){
+      categories = data.categories;
+      saveCategories(categories);
+      renderCategoryEditor();
+    }
+    if (typeof data.autoClassify === "boolean"){
+      autoClassifyEnabled = data.autoClassify;
+      saveAutoClassify(autoClassifyEnabled);
+    }
+    await loadEntries();
+    showToast(mode === "replace" ? "置き換えてインポートしました" : "追加でインポートしました");
+    pendingImportData = null;
+    importConfirmOverlay.classList.remove("open");
+  }
+
+  document.getElementById("importCancelBtn").addEventListener("click", () => {
+    pendingImportData = null;
+    importConfirmOverlay.classList.remove("open");
+  });
+  document.getElementById("importMergeBtn").addEventListener("click", () => performImport("merge"));
+  document.getElementById("importReplaceBtn").addEventListener("click", () => performImport("replace"));
+  importConfirmOverlay.addEventListener("click", (e) => {
+    if (e.target === importConfirmOverlay){ pendingImportData = null; importConfirmOverlay.classList.remove("open"); }
+  });
+
+  renderCategoryEditor();
+  loadEntries();
+})();
+</script>
+</body>
+</html>
