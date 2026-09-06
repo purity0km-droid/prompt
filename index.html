@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>キャラクター図鑑</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -106,12 +107,18 @@
           </div>
           <div class="field-hint">一覧の絞り込みに使う分類タグです（例：中性的、幼馴染、和風）</div>
         </div>
+        <div class="field">
+          <label>親キャラクター</label>
+          <select id="parentSelect"><option value="">なし</option></select>
+          <div class="field-hint">アナザー（派生プロンプト・子供時代の姿など）の場合、元になったキャラクターを選択してください</div>
+        </div>
       </div>
 
       <div class="form-section">
         <h3>プロンプト</h3>
         <div class="field">
           <textarea id="promptInput" placeholder="masterpiece, best quality, 1girl, solo, ..."></textarea>
+          <div class="char-counter" id="promptCharCounter">0 / 4096</div>
         </div>
       </div>
 
@@ -154,7 +161,7 @@
           <div class="lora-list" id="loraList"></div>
           <button class="add-row-btn" id="addLoraBtn">＋ LoRAを追加</button>
         </div>
-        <div class="row2">
+        <div class="row3">
           <div class="field">
             <label>ステップ数</label>
             <input type="text" id="stepsInput" placeholder="例：30">
@@ -162,6 +169,10 @@
           <div class="field">
             <label>CFGスケール</label>
             <input type="text" id="cfgInput" placeholder="例：5.0">
+          </div>
+          <div class="field">
+            <label>シフト値</label>
+            <input type="text" id="shiftInput" placeholder="例：3.0">
           </div>
         </div>
       </div>
@@ -220,12 +231,18 @@
         </div>
       </div>
 
+      <div class="detail-section" id="detailRelationsSection" style="display:none;">
+        <h4>関連キャラクター</h4>
+        <div id="detailRelations"></div>
+      </div>
+
       <details class="detail-section detail-accordion">
         <summary>
           <span class="accordion-label">プロンプト</span>
           <button class="copy-btn" id="detailPromptCopyBtn">全文コピー</button>
         </summary>
         <div class="detail-pre" id="detailPromptText"></div>
+        <div class="prompt-groups" id="detailPromptGroups"></div>
       </details>
 
       <details class="detail-section detail-accordion">

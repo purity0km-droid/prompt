@@ -5,6 +5,7 @@
   const FRAME_ASPECT = 3 / 4; // .thumb / .detail-thumb / .thumb-preview / .crop-frame は全て3:4で統一
   const THUMB_MAX_DIM = 1600;
   const SCALE_MIN = 0.2, SCALE_MAX = 3;
+  const PROMPT_CHAR_LIMIT = 4096; // PixAI等、改行も1文字としてカウントする仕様に合わせた上限
 
   // ---------- 画像フィット計算（G:\Claude\image-fit-handoff より移植） ----------
   // object-fit:contain を土台に、cover と同じ見た目になる倍率(coverFactor)を掛けることで、
@@ -28,6 +29,20 @@
     imgEl.style.transform = style.transform;
   }
   function clamp(value, min, max){ return Math.min(max, Math.max(min, value)); }
+
+  // 括弧内のカンマを無視してトップレベルのカンマだけで分割する（重み表記 (masterpiece:1.2) 等が壊れない）
+  function splitTopLevel(str){
+    const result = [];
+    let depth = 0, current = "";
+    for (const ch of str){
+      if ("([{".includes(ch)) depth++;
+      if (")]}".includes(ch)) depth = Math.max(0, depth - 1);
+      if (ch === "," && depth === 0){ result.push(current.trim()); current = ""; }
+      else current += ch;
+    }
+    if (current.trim()) result.push(current.trim());
+    return result.filter(Boolean);
+  }
 
   // ---------- IndexedDB helpers ----------
   const DB_NAME = "character_library_db";
@@ -123,6 +138,9 @@
   const samplerInput = document.getElementById("samplerInput");
   const stepsInput = document.getElementById("stepsInput");
   const cfgInput = document.getElementById("cfgInput");
+  const shiftInput = document.getElementById("shiftInput");
+  const promptCharCounter = document.getElementById("promptCharCounter");
+  const parentSelect = document.getElementById("parentSelect");
 
   const tagEditor = document.getElementById("tagEditor");
   const tagInput = document.getElementById("tagInput");
@@ -153,7 +171,10 @@
   const detailTags = document.getElementById("detailTags");
   const detailDate = document.getElementById("detailDate");
   const detailPromptText = document.getElementById("detailPromptText");
+  const detailPromptGroups = document.getElementById("detailPromptGroups");
   const detailNegative = document.getElementById("detailNegative");
+  const detailRelationsSection = document.getElementById("detailRelationsSection");
+  const detailRelations = document.getElementById("detailRelations");
   const detailSettingsGrid = document.getElementById("detailSettingsGrid");
   const detailNotesSection = document.getElementById("detailNotesSection");
   const detailNotes = document.getElementById("detailNotes");
@@ -177,6 +198,13 @@
     return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日 " +
       String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
   }
+  function updatePromptCharCounter(){
+    const len = promptInput.value.length; // 改行も1文字としてカウントされる（textareaのvalueは常にLF区切り）
+    promptCharCounter.textContent = `${len} / ${PROMPT_CHAR_LIMIT}`;
+    promptCharCounter.classList.toggle("over-limit", len > PROMPT_CHAR_LIMIT);
+  }
+  promptInput.addEventListener("input", updatePromptCharCounter);
+
   async function copyText(text){
     if (!text){ showToast("コピーする内容がありません"); return; }
     try{ await navigator.clipboard.writeText(text); showToast("コピーしました"); }
@@ -259,6 +287,24 @@
   });
 
   // ---------- プロンプト辞典 ----------
+  const DICTIONARY_LOOKUP = new Map(PROMPT_DICTIONARY.map(item => [item.code.toLowerCase(), item]));
+  const UNCLASSIFIED_LABEL = "未分類";
+
+  // プロンプト文字列をトップレベルのカンマで分割し、辞典と照合してカテゴリ別にグループ化する
+  // （入力側はプレーンテキストのままだが、詳細画面では辞典を使って自動的に内訳表示する）
+  function categorizePromptText(promptText){
+    const parts = splitTopLevel(promptText || "");
+    const groups = {};
+    parts.forEach(text => {
+      const match = DICTIONARY_LOOKUP.get(text.toLowerCase());
+      const cat = match ? match.category : UNCLASSIFIED_LABEL;
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(text);
+    });
+    const order = [...PROMPT_DICTIONARY_CATEGORIES, UNCLASSIFIED_LABEL];
+    return order.filter(cat => groups[cat] && groups[cat].length).map(cat => ({ category: cat, tags: groups[cat] }));
+  }
+
   function filterDictionary(category, query){
     const q = (query || "").trim().toLowerCase();
     return PROMPT_DICTIONARY.filter(item => {
@@ -310,6 +356,7 @@
     const targetInput = formDictTarget === "negative" ? negativeInput : promptInput;
     const current = targetInput.value.trim();
     targetInput.value = current ? current + ", " + code : code;
+    updatePromptCharCounter();
     showToast(`「${code}」を追加しました`);
   }
   formDictSearch.addEventListener("input", () => { formDictQuery = formDictSearch.value; renderFormDictPicker(); });
@@ -403,6 +450,18 @@
 
   adjustImageBtn.addEventListener("click", openCropModal);
 
+  // ---------- 親キャラクター選択 ----------
+  function renderParentSelect(selectedId){
+    parentSelect.innerHTML = '<option value="">なし</option>';
+    entries.filter(e => e.id !== editingId).forEach(e => {
+      const opt = document.createElement("option");
+      opt.value = e.id;
+      opt.textContent = e.name;
+      parentSelect.appendChild(opt);
+    });
+    parentSelect.value = selectedId || "";
+  }
+
   // ---------- Form modal open/close ----------
   function openForm(entry){
     editingId = entry ? entry.id : null;
@@ -415,6 +474,9 @@
     samplerInput.value = entry ? (entry.sampler || "") : "";
     stepsInput.value = entry ? (entry.steps || "") : "";
     cfgInput.value = entry ? (entry.cfgScale || "") : "";
+    shiftInput.value = entry ? (entry.shift || "") : "";
+    renderParentSelect(entry ? entry.parentId : "");
+    updatePromptCharCounter();
     currentTags = entry ? [...entry.tags] : [];
     currentThumb = entry ? entry.thumb : null;
     currentThumbTransform = entry && entry.thumbTransform ? { ...entry.thumbTransform } : { scale: 1, x: 0, y: 0 };
@@ -490,6 +552,8 @@
       sampler: samplerInput.value.trim(),
       steps: stepsInput.value.trim(),
       cfgScale: cfgInput.value.trim(),
+      shift: shiftInput.value.trim(),
+      parentId: parentSelect.value || null,
       loras: cleanedLoras,
       thumb: currentThumb,
       thumbTransform: { ...currentThumbTransform },
@@ -503,6 +567,34 @@
     showToast(editingId ? "更新しました" : "登録しました");
   });
 
+  // ---------- 関連キャラクター（親子関係） ----------
+  function renderDetailRelations(entry){
+    const parent = entry.parentId ? entries.find(e => e.id === entry.parentId) : null;
+    const children = entries.filter(e => e.parentId === entry.id);
+    if (!parent && !children.length){
+      detailRelationsSection.style.display = "none";
+      detailRelations.innerHTML = "";
+      return;
+    }
+    detailRelationsSection.style.display = "";
+    let html = "";
+    if (parent){
+      html += `<div class="relation-row"><span class="relation-label">派生元</span><button type="button" class="mini-tag relation-link" data-id="${escapeHtml(parent.id)}">${escapeHtml(parent.name)}</button></div>`;
+    }
+    if (children.length){
+      html += `<div class="relation-row"><span class="relation-label">派生キャラクター</span><div class="relation-chip-list">${
+        children.map(c => `<button type="button" class="mini-tag relation-link" data-id="${escapeHtml(c.id)}">${escapeHtml(c.name)}</button>`).join("")
+      }</div></div>`;
+    }
+    detailRelations.innerHTML = html;
+    detailRelations.querySelectorAll(".relation-link").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = entries.find(e => e.id === btn.dataset.id);
+        if (target) openDetail(target);
+      });
+    });
+  }
+
   // ---------- Detail modal ----------
   function openDetail(entry){
     detailEntryId = entry.id;
@@ -512,8 +604,16 @@
     detailTags.innerHTML = entry.tags.length ? entry.tags.map(t => `<span class="mini-tag">${escapeHtml(t)}</span>`).join("") : `<span class="mini-tag">タグなし</span>`;
     detailDate.textContent = "登録日：" + formatDate(entry.createdAt);
 
+    renderDetailRelations(entry);
+
     detailPromptText.textContent = entry.prompt || "プロンプトは登録されていません";
     detailPromptText.className = "detail-pre" + (entry.prompt ? "" : " empty-note");
+    const promptGroups = entry.prompt ? categorizePromptText(entry.prompt) : [];
+    detailPromptGroups.innerHTML = promptGroups.map(g => `
+      <div class="prompt-group">
+        <div class="prompt-group-title">${escapeHtml(g.category)}</div>
+        <div class="prompt-group-tags">${g.tags.map(t => `<span class="mini-tag">${escapeHtml(t)}</span>`).join("")}</div>
+      </div>`).join("");
 
     detailNegative.textContent = entry.negative || "ネガティブプロンプトは登録されていません";
     detailNegative.className = "detail-pre" + (entry.negative ? "" : " empty-note");
@@ -523,6 +623,7 @@
       ["Sampling Method", entry.sampler],
       ["ステップ数", entry.steps],
       ["CFGスケール", entry.cfgScale],
+      ["シフト値", entry.shift],
     ].filter(([,v]) => v);
     let html = settingsItems.map(([k,v]) => `<div class="item"><div class="k">${escapeHtml(k)}</div><div class="v">${escapeHtml(v)}</div></div>`).join("");
     if (entry.loras && entry.loras.length){
@@ -674,6 +775,7 @@
     }
     if (!e.thumbTransform) e.thumbTransform = { scale: 1, x: 0, y: 0 };
     if (typeof e.thumbAspect !== "number") e.thumbAspect = null;
+    if (typeof e.parentId === "undefined") e.parentId = null;
     if (!e.loras) e.loras = [];
     if (!e.tags) e.tags = [];
     return e;
