@@ -236,22 +236,19 @@
         <div id="detailRelations"></div>
       </div>
 
-      <details class="detail-section detail-accordion">
-        <summary>
-          <span class="accordion-label">プロンプト</span>
-          <button class="copy-btn" id="detailPromptCopyBtn">全文コピー</button>
-        </summary>
+      <div class="detail-section">
+        <h4>プロンプト <button class="copy-btn" id="detailPromptCopyBtn">全文コピー</button></h4>
         <div class="detail-pre" id="detailPromptText"></div>
-        <div class="prompt-groups" id="detailPromptGroups"></div>
-      </details>
+        <details class="detail-accordion prompt-breakdown" id="detailPromptBreakdown">
+          <summary><span class="accordion-label">カテゴリ別内訳</span></summary>
+          <div class="prompt-groups" id="detailPromptGroups"></div>
+        </details>
+      </div>
 
-      <details class="detail-section detail-accordion">
-        <summary>
-          <span class="accordion-label">ネガティブプロンプト</span>
-          <button class="copy-btn" id="detailNegativeCopyBtn">コピー</button>
-        </summary>
+      <div class="detail-section">
+        <h4>ネガティブプロンプト <button class="copy-btn" id="detailNegativeCopyBtn">コピー</button></h4>
         <div class="detail-pre" id="detailNegative"></div>
-      </details>
+      </div>
 
       <div class="detail-section">
         <h4>生成設定</h4>

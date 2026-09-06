@@ -171,6 +171,7 @@
   const detailTags = document.getElementById("detailTags");
   const detailDate = document.getElementById("detailDate");
   const detailPromptText = document.getElementById("detailPromptText");
+  const detailPromptBreakdown = document.getElementById("detailPromptBreakdown");
   const detailPromptGroups = document.getElementById("detailPromptGroups");
   const detailNegative = document.getElementById("detailNegative");
   const detailRelationsSection = document.getElementById("detailRelationsSection");
@@ -609,6 +610,7 @@
     detailPromptText.textContent = entry.prompt || "プロンプトは登録されていません";
     detailPromptText.className = "detail-pre" + (entry.prompt ? "" : " empty-note");
     const promptGroups = entry.prompt ? categorizePromptText(entry.prompt) : [];
+    detailPromptBreakdown.style.display = promptGroups.length ? "" : "none";
     detailPromptGroups.innerHTML = promptGroups.map(g => `
       <div class="prompt-group">
         <div class="prompt-group-title">${escapeHtml(g.category)}</div>
@@ -652,13 +654,11 @@
     closeDetail();
     if (entry) openForm(entry);
   });
-  document.getElementById("detailPromptCopyBtn").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
+  document.getElementById("detailPromptCopyBtn").addEventListener("click", () => {
     const entry = entries.find(x => x.id === detailEntryId);
     if (entry) copyText(entry.prompt);
   });
-  document.getElementById("detailNegativeCopyBtn").addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
+  document.getElementById("detailNegativeCopyBtn").addEventListener("click", () => {
     const entry = entries.find(x => x.id === detailEntryId);
     if (entry) copyText(entry.negative);
   });
