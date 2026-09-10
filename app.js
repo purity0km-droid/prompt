@@ -621,11 +621,11 @@
     detailNegative.className = "detail-pre" + (entry.negative ? "" : " empty-note");
 
     const settingsItems = [
-      ["VAEモデル", entry.model],
+      ["Model", entry.model],
       ["Sampling Method", entry.sampler],
-      ["ステップ数", entry.steps],
-      ["CFGスケール", entry.cfgScale],
-      ["シフト値", entry.shift],
+      ["Sampling Steps", entry.steps],
+      ["CFG Scale", entry.cfgScale],
+      ["Shift", entry.shift],
     ].filter(([,v]) => v);
     let html = settingsItems.map(([k,v]) => `<div class="item"><div class="k">${escapeHtml(k)}</div><div class="v">${escapeHtml(v)}</div></div>`).join("");
     if (entry.loras && entry.loras.length){

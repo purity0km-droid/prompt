@@ -1,0 +1,77 @@
+{
+  "app": "character-library-backup",
+  "version": 2,
+  "exportedAt": "2026-09-10T00:00:00.000Z",
+  "entries": [
+    {
+      "id": "sample-pixai-001",
+      "name": "サンプル：桜庭ミオ",
+      "tags": [
+        "サンプル",
+        "オリジナル",
+        "春"
+      ],
+      "prompt": "masterpiece, best quality, 1girl, solo, long hair, pink hair, blue eyes, smile, school uniform, standing, cherry blossoms, outdoors, soft lighting",
+      "negative": "lowres, bad anatomy, bad hands, extra fingers, missing fingers, blurry, text, watermark, logo",
+      "notes": "読み込み確認用の親キャラクターです。完成版プロンプトの常時表示と、カテゴリ別内訳のアコーディオンを確認できます。",
+      "model": "Haruka v2",
+      "sampler": "Euler a",
+      "steps": "28",
+      "cfgScale": "5",
+      "shift": "",
+      "parentId": null,
+      "loras": [
+        {
+          "name": "Sample Character LoRA",
+          "strength": "0.8"
+        }
+      ],
+      "thumb": null,
+      "thumbTransform": {
+        "scale": 1,
+        "x": 0,
+        "y": 0
+      },
+      "thumbAspect": null,
+      "createdAt": 1788998400000,
+      "updatedAt": 1788998400000
+    },
+    {
+      "id": "sample-pixai-002",
+      "name": "サンプル：桜庭ミオ（夜景衣装）",
+      "tags": [
+        "サンプル",
+        "派生",
+        "夜景"
+      ],
+      "prompt": "masterpiece, best quality, 1girl, solo, long hair, pink hair, blue eyes, gentle smile, black dress, looking at viewer, city lights, night, rooftop, cinematic lighting",
+      "negative": "worst quality, low quality, bad anatomy, deformed hands, extra limbs, blurry, jpeg artifacts, signature, watermark",
+      "notes": "親キャラクターとの関連表示を確認するための派生サンプルです。",
+      "model": "Hinata v2",
+      "sampler": "DPM++ 2M Karras",
+      "steps": "30",
+      "cfgScale": "5.5",
+      "shift": "3",
+      "parentId": "sample-pixai-001",
+      "loras": [
+        {
+          "name": "Sample Character LoRA",
+          "strength": "0.8"
+        },
+        {
+          "name": "Cinematic Lighting",
+          "strength": "0.45"
+        }
+      ],
+      "thumb": null,
+      "thumbTransform": {
+        "scale": 1,
+        "x": 0,
+        "y": 0
+      },
+      "thumbAspect": null,
+      "createdAt": 1788998460000,
+      "updatedAt": 1788998460000
+    }
+  ]
+}
