@@ -141,6 +141,15 @@
   const shiftInput = document.getElementById("shiftInput");
   const promptCharCounter = document.getElementById("promptCharCounter");
   const parentSelect = document.getElementById("parentSelect");
+  const generationSuggestionLists = {
+    model: document.getElementById("modelSuggestions"),
+    sampler: document.getElementById("samplerSuggestions"),
+    steps: document.getElementById("stepsSuggestions"),
+    cfgScale: document.getElementById("cfgSuggestions"),
+    shift: document.getElementById("shiftSuggestions"),
+    loraName: document.getElementById("loraNameSuggestions"),
+    loraWeight: document.getElementById("loraWeightSuggestions"),
+  };
 
   const tagEditor = document.getElementById("tagEditor");
   const tagInput = document.getElementById("tagInput");
@@ -211,6 +220,31 @@
     try{ await navigator.clipboard.writeText(text); showToast("コピーしました"); }
     catch(err){ showToast("コピーに失敗しました"); }
   }
+
+  function uniqueSuggestionValues(values){
+    return [...new Set(values
+      .map(value => String(value ?? "").trim())
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, "ja", { numeric: true, sensitivity: "base" }));
+  }
+  function fillSuggestionList(list, values){
+    list.replaceChildren(...uniqueSuggestionValues(values).map(value => {
+      const option = document.createElement("option");
+      option.value = value;
+      return option;
+    }));
+  }
+  function refreshGenerationSettingSuggestions(){
+    fillSuggestionList(generationSuggestionLists.model, entries.map(entry => entry.model));
+    fillSuggestionList(generationSuggestionLists.sampler, entries.map(entry => entry.sampler));
+    fillSuggestionList(generationSuggestionLists.steps, entries.map(entry => entry.steps));
+    fillSuggestionList(generationSuggestionLists.cfgScale, entries.map(entry => entry.cfgScale));
+    fillSuggestionList(generationSuggestionLists.shift, entries.map(entry => entry.shift));
+    const loras = entries.flatMap(entry => Array.isArray(entry.loras) ? entry.loras : []);
+    fillSuggestionList(generationSuggestionLists.loraName, loras.map(lora => lora.name));
+    fillSuggestionList(generationSuggestionLists.loraWeight, loras.map(lora => lora.strength));
+  }
+
   // 画像を長辺 THUMB_MAX_DIM にリサイズしてJPEG(base64)化し、あわせて画像自体の縦横比を返す
   function resizeImage(file, maxDim){
     return new Promise((resolve, reject) => {
@@ -268,8 +302,8 @@
       const row = document.createElement("div");
       row.className = "lora-row";
       row.innerHTML = `
-        <input type="text" placeholder="LoRA名" value="${escapeHtml(lora.name)}">
-        <input type="text" class="strength" placeholder="強さ" value="${escapeHtml(lora.strength)}">
+        <input type="text" list="loraNameSuggestions" placeholder="LoRA" value="${escapeHtml(lora.name)}">
+        <input type="text" class="strength" list="loraWeightSuggestions" placeholder="Weight" value="${escapeHtml(lora.strength)}">
         <button type="button" class="remove-row">✕</button>
       `;
       const [nameEl, strengthEl] = row.querySelectorAll("input");
@@ -745,7 +779,7 @@
       const card = document.createElement("button");
       card.type = "button";
       card.className = "card";
-      const tagsHtml = entry.tags.slice(0,3).map(t => `<span class="mini-tag">${escapeHtml(t)}</span>`).join("");
+      const tagsHtml = entry.tags.slice(0,5).map(t => `<span class="mini-tag" title="${escapeHtml(t)}">${escapeHtml(t)}</span>`).join("");
       let thumbHtml = `<span class="placeholder">🖼️</span>`;
       if (entry.thumb){
         const style = buildImageStyle({ transform: entry.thumbTransform, frameAspect: FRAME_ASPECT, imageAspect: entry.thumbAspect });
@@ -785,6 +819,7 @@
   async function loadEntries(){
     const raw = await dbGetAll();
     entries = raw.map(migrateEntry);
+    refreshGenerationSettingSuggestions();
     renderTagFilterRow();
     renderGrid();
   }

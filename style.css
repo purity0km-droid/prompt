@@ -85,6 +85,7 @@ select.sort-select{ padding:11px 14px; border-radius:11px; border:1px solid var(
 .card-model{ font-size:11px; color:var(--text-muted); }
 .card-tags{ display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; }
 .mini-tag{ font-size:11px; padding:2px 8px; border-radius:999px; background:var(--surface-alt); color:var(--text-muted); border:1px solid var(--border); }
+.card-tags .mini-tag{ max-width:100%; box-sizing:border-box; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10.5px; padding:2px 7px; }
 
 .empty{ margin-top:60px; text-align:center; color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:14px; }
 .empty .icon{ font-size:44px; opacity:.5; }

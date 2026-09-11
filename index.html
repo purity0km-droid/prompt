@@ -149,11 +149,11 @@
         <div class="row2">
           <div class="field">
             <label>Model</label>
-            <input type="text" id="modelInput" placeholder="例：Haruka v2">
+            <input type="text" id="modelInput" list="modelSuggestions" placeholder="例：Haruka v2">
           </div>
           <div class="field">
             <label>Sampling Method</label>
-            <input type="text" id="samplerInput" placeholder="例：Euler a">
+            <input type="text" id="samplerInput" list="samplerSuggestions" placeholder="例：Euler a">
           </div>
         </div>
         <div class="field">
@@ -164,17 +164,25 @@
         <div class="row3">
           <div class="field">
             <label>Sampling Steps</label>
-            <input type="text" id="stepsInput" placeholder="例：30">
+            <input type="text" id="stepsInput" list="stepsSuggestions" placeholder="例：30">
           </div>
           <div class="field">
             <label>CFG Scale</label>
-            <input type="text" id="cfgInput" placeholder="例：5.0">
+            <input type="text" id="cfgInput" list="cfgSuggestions" placeholder="例：5.0">
           </div>
           <div class="field">
             <label>Shift</label>
-            <input type="text" id="shiftInput" placeholder="例：3.0">
+            <input type="text" id="shiftInput" list="shiftSuggestions" placeholder="例：3.0">
           </div>
         </div>
+        <datalist id="modelSuggestions"></datalist>
+        <datalist id="samplerSuggestions"></datalist>
+        <datalist id="stepsSuggestions"></datalist>
+        <datalist id="cfgSuggestions"></datalist>
+        <datalist id="shiftSuggestions"></datalist>
+        <datalist id="loraNameSuggestions"></datalist>
+        <datalist id="loraWeightSuggestions"></datalist>
+        <div class="field-hint">入力欄を選ぶと、登録済みの設定が候補に表示されます</div>
       </div>
 
       <div class="form-section">
